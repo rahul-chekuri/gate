@@ -19,6 +19,7 @@ package com.netflix.spinnaker.gate.security.saml;
 
 import com.netflix.spinnaker.kork.annotations.NullableByDefault;
 import com.netflix.spinnaker.kork.exceptions.ConfigurationException;
+import jakarta.validation.constraints.NotEmpty;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,7 +33,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
