@@ -19,7 +19,6 @@ package com.netflix.spinnaker.gate.security.anonymous;
 import com.netflix.spinnaker.fiat.shared.FiatStatus;
 import com.netflix.spinnaker.gate.security.SpinnakerAuthConfig;
 import com.netflix.spinnaker.gate.services.CredentialsService;
-import com.netflix.spinnaker.security.User;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -29,13 +28,15 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -47,9 +48,9 @@ import org.springframework.util.CollectionUtils;
 @Configuration
 @Log4j2
 @EnableWebSecurity
-@Order(Ordered.LOWEST_PRECEDENCE)
+@Order()
 @RequiredArgsConstructor
-public class AnonymousConfig extends WebSecurityConfigurerAdapter {
+public class AnonymousConfig {
   private static final String key = "spinnaker-anonymous";
   private static final String defaultEmail = "anonymous";
 
@@ -57,16 +58,13 @@ public class AnonymousConfig extends WebSecurityConfigurerAdapter {
   private final FiatStatus fiatStatus;
   @Getter private final List<String> anonymousAllowedAccounts = new CopyOnWriteArrayList<>();
 
-  @Override
-  @SuppressWarnings("deprecation")
-  public void configure(HttpSecurity http) throws Exception {
+  @Bean
+  public SecurityFilterChain configure(HttpSecurity http) throws Exception {
     updateAnonymousAccounts();
     // Not using the ImmutableUser version in order to update allowedAccounts.
-    User principal = new User();
-    principal.setEmail(defaultEmail);
-    principal.setAllowedAccounts(anonymousAllowedAccounts);
-
-    http.anonymous().key(key).principal(principal).and().csrf().disable();
+    String[] roles = anonymousAllowedAccounts.toArray(String[]::new);
+    UserDetails principal = User.builder().username(defaultEmail).roles(roles).build();
+    return http.anonymous().key(key).principal(principal).and().csrf().disable().build();
   }
 
   @Scheduled(fixedDelay = 60000L)
