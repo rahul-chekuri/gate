@@ -23,6 +23,7 @@ import com.netflix.spinnaker.fiat.shared.FiatStatus;
 import com.netflix.spinnaker.gate.filters.FiatSessionFilter;
 import com.netflix.spinnaker.gate.services.ServiceAccountFilterConfigProps;
 import com.netflix.spinnaker.kork.annotations.NonnullByDefault;
+import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
 @Configuration
@@ -49,7 +49,6 @@ public class AuthConfig {
   private final PermissionRevokingLogoutSuccessHandler permissionRevokingLogoutSuccessHandler;
   private final FiatStatus fiatStatus;
   private final FiatPermissionEvaluator permissionEvaluator;
-  private final RequestMatcherProvider requestMatcherProvider;
 
   @Setter(
       onMethod_ = {@Autowired},
@@ -72,59 +71,44 @@ public class AuthConfig {
   }
 
   public void configure(HttpSecurity http) throws Exception {
-    http.requestMatcher(requestMatcherProvider.requestMatcher())
-        .authorizeRequests(
-            registry -> {
-              registry
-                  // https://github.com/spring-projects/spring-security/issues/11055#issuecomment-1098061598 suggests
-                  //
-                  // filterSecurityInterceptorOncePerRequest(false)
-                  //
-                  // until spring boot 3.0.  Since
-                  //
-                  // .antMatchers("/error").permitAll()
-                  //
-                  // permits unauthorized access to /error, filterSecurityInterceptorOncePerRequest
-                  // isn't relevant.
-                  .antMatchers("/error")
-                  .permitAll()
-                  .antMatchers("/favicon.ico")
-                  .permitAll()
-                  .antMatchers(HttpMethod.OPTIONS, "/**")
-                  .permitAll()
-                  .antMatchers(PermissionRevokingLogoutSuccessHandler.LOGGED_OUT_URL)
-                  .permitAll()
-                  .antMatchers("/auth/user")
-                  .permitAll()
-                  .antMatchers("/plugins/deck/**")
-                  .permitAll();
-              var webhooks = registry.antMatchers(HttpMethod.POST, "/webhooks/**");
-              if (webhookDefaultAuthEnabled) {
-                webhooks.authenticated();
-              } else {
-                webhooks.permitAll();
-              }
-              registry
-                  .antMatchers(HttpMethod.POST, "/notifications/callbacks/**")
-                  .permitAll()
-                  .antMatchers(HttpMethod.POST, "/managed/notifications/callbacks/**")
-                  .permitAll()
-                  .antMatchers("/health")
-                  .permitAll()
-                  .antMatchers("/**")
-                  .authenticated();
-            })
-        .logout(
-            logout ->
-                logout
-                    .logoutUrl("/auth/logout")
-                    .logoutSuccessHandler(permissionRevokingLogoutSuccessHandler)
-                    .permitAll())
-        .csrf(AbstractHttpConfigurer::disable);
+
+    http.authorizeHttpRequests(
+        (authz) ->
+            authz
+                .requestMatchers(
+                    "/error", "/favicon.ico", "/auth/user", "/health", "/aop-prometheus")
+                .permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**")
+                .permitAll()
+                .requestMatchers(PermissionRevokingLogoutSuccessHandler.LOGGED_OUT_URL)
+                .permitAll()
+                .requestMatchers("/plugins/deck/**")
+                .permitAll()
+                .requestMatchers(HttpMethod.POST, "/webhooks/**")
+                .permitAll()
+                .requestMatchers(HttpMethod.POST, "/notifications/callbacks/**")
+                .permitAll()
+                .requestMatchers(HttpMethod.POST, "/managed/notifications/callbacks/**")
+                .permitAll()
+                .requestMatchers("/**")
+                .authenticated());
 
     if (fiatSessionFilterEnabled) {
-      var filter = new FiatSessionFilter(fiatStatus, permissionEvaluator);
-      http.addFilterBefore(filter, AnonymousAuthenticationFilter.class);
+      Filter fiatSessionFilter = new FiatSessionFilter(fiatStatus, permissionEvaluator);
+      http.addFilterBefore(fiatSessionFilter, AnonymousAuthenticationFilter.class);
     }
+
+    if (webhookDefaultAuthEnabled) {
+      http.authorizeHttpRequests(
+          (requests) -> requests.requestMatchers(HttpMethod.POST, "/webhooks/**").authenticated());
+    }
+
+    http.logout()
+        .logoutUrl("/auth/logout")
+        .logoutSuccessHandler(permissionRevokingLogoutSuccessHandler)
+        .permitAll()
+        .and()
+        .csrf()
+        .disable();
   }
 }
