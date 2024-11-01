@@ -80,6 +80,7 @@ public class IapSsoConfig {
     long expirationTimeAllowedSkew = 30000L;
   }
 
+  @Bean
   public SecurityFilterChain configure(HttpSecurity http) throws Exception {
     log.info("IAP JWT token verification is enabled.");
 
