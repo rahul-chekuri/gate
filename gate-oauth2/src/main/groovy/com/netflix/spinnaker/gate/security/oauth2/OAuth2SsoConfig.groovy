@@ -18,6 +18,8 @@ package com.netflix.spinnaker.gate.security.oauth2
 
 import com.netflix.spinnaker.gate.config.AuthConfig
 import com.netflix.spinnaker.gate.security.SpinnakerAuthConfig
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -28,21 +30,19 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices
+import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 import org.springframework.session.web.http.DefaultCookieSerializer
 import org.springframework.stereotype.Component
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
-
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 
 @Configuration
 @SpinnakerAuthConfig
@@ -52,7 +52,7 @@ import jakarta.servlet.http.HttpServletResponse
 // Note the 4 single-quotes below - this is a raw groovy string, because SpEL and groovy
 // string syntax overlap!
 @ConditionalOnExpression(''''${security.oauth2.client.client-id:}'!=""''')
-class OAuth2SsoConfig extends WebSecurityConfigurerAdapter {
+class OAuth2SsoConfig {
 
   @Autowired
   AuthConfig authConfig
@@ -77,14 +77,16 @@ class OAuth2SsoConfig extends WebSecurityConfigurerAdapter {
     new SpinnakerUserInfoTokenServices()
   }
 
-  @Override
-  void configure(HttpSecurity http) throws Exception {
+  @Bean
+  SecurityFilterChain configure(HttpSecurity http, AuthenticationConfiguration authConfiguration) throws Exception {
     defaultCookieSerializer.setSameSite(null)
     authConfig.configure(http)
 
     http.exceptionHandling().authenticationEntryPoint(entryPoint)
-    http.addFilterBefore(new BasicAuthenticationFilter(authenticationManager()), UsernamePasswordAuthenticationFilter)
+    http.addFilterBefore(new BasicAuthenticationFilter(authConfiguration.getAuthenticationManager()), UsernamePasswordAuthenticationFilter)
     http.addFilterBefore(externalAuthTokenFilter, AbstractPreAuthenticatedProcessingFilter.class)
+
+    return http.build() as SecurityFilterChain
   }
 
   /**
