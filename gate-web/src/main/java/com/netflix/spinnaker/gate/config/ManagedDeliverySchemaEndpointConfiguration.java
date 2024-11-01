@@ -23,17 +23,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @Order(HIGHEST_PRECEDENCE + 23)
 public class ManagedDeliverySchemaEndpointConfiguration {
   @Bean
   public SecurityFilterChain configure(HttpSecurity http) throws Exception {
-    http.securityMatcher(new AntPathRequestMatcher("/managed/delivery-configs/schema"))
-        .authorizeRequests()
-        .anyRequest()
-        .permitAll();
-    return http.build();
+    return http.authorizeHttpRequests(
+            (authz) -> authz.requestMatchers("/managed/delivery-configs/schema").permitAll())
+        .build();
   }
 }
