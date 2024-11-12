@@ -22,12 +22,12 @@ import com.netflix.spinnaker.gate.services.internal.EchoService
 import com.netflix.spinnaker.gate.services.internal.OrcaServiceSelector
 import com.squareup.okhttp.mockwebserver.MockWebServer
 import io.cloudevents.spring.mvc.CloudEventHttpMessageConverter
+import jakarta.servlet.ServletException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.springframework.web.util.NestedServletException
 import retrofit.RestAdapter
 import retrofit.client.OkClient
 import retrofit.converter.JacksonConverter
@@ -94,8 +94,8 @@ class WebhooksControllerSpec extends Specification {
         .andExpect(status().isOk()).andReturn()
 
     then:
-    NestedServletException ex = thrown()
-    ex.message.startsWith("Request processing failed; nested exception is retrofit.RetrofitError: Failed to connect to localhost")
+    ServletException ex = thrown()
+    ex.message.startsWith("Request processing failed: retrofit.RetrofitError: Failed to connect to localhost")
   }
 
   void 'handles CDEvents API with BAD_REQUEST'() {
@@ -151,7 +151,7 @@ class WebhooksControllerSpec extends Specification {
       .andExpect(status().isOk()).andReturn()
 
     then:
-    NestedServletException ex = thrown()
-    ex.message.startsWith("Request processing failed; nested exception is retrofit.RetrofitError: Failed to connect to localhost")
+    ServletException ex = thrown()
+    ex.message.startsWith("Request processing failed: retrofit.RetrofitError: Failed to connect to localhost")
   }
 }
