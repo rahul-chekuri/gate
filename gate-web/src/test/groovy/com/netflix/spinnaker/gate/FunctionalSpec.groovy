@@ -37,10 +37,11 @@ import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.core.annotation.Order
+import org.springframework.security.config.annotation.SecurityBuilder
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import retrofit.RetrofitError
 import retrofit.RestAdapter
+import retrofit.RetrofitError
 import retrofit.client.OkClient
 import retrofit.converter.JacksonConverter
 import retrofit.mime.TypedInput
@@ -191,7 +192,7 @@ class FunctionalSpec extends Specification {
   @Order(10)
   @Import(ErrorConfiguration)
   @EnableAutoConfiguration(exclude = [GroovyTemplateAutoConfiguration, GsonAutoConfiguration])
-  private static class FunctionalConfiguration extends WebSecurityConfigurerAdapter {
+  private static class FunctionalConfiguration implements WebSecurityConfigurer {
 
     @Bean
     ClouddriverServiceSelector clouddriverSelector() {
@@ -293,11 +294,21 @@ class FunctionalSpec extends Specification {
       new PipelineControllerConfigProperties();
     }
 
-    @Override
+
     protected void configure(HttpSecurity http) throws Exception {
       http
         .csrf().disable()
         .authorizeRequests().antMatchers("/**").permitAll()
+    }
+
+    @Override
+    void init(SecurityBuilder builder) throws Exception {
+
+    }
+
+    @Override
+    void configure(SecurityBuilder builder) throws Exception {
+
     }
   }
 }
