@@ -23,7 +23,6 @@ import com.netflix.spinnaker.gate.services.internal.IgorService
 import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import org.springframework.web.util.UriUtils
 import retrofit.RetrofitError
 
 @CompileStatic
@@ -32,10 +31,6 @@ class BuildService {
 
   @Autowired(required = false)
   IgorService igorService
-
-  private String encode(uri) {
-    return UriUtils.encodeFragment(uri.toString(), "UTF-8")
-  }
 
   List<String> getBuildMasters(String buildServiceType) {
     if (!igorService) {
@@ -47,14 +42,6 @@ class BuildService {
       return igorService.getBuildMasters()
     }
   }
-
-  List<String> getBuildMasters() {
-    if (!igorService) {
-      return []
-    }
-    return igorService.getBuildMasters()
-  }
-
 
   List<String> getJobsForBuildMaster(String controller) {
     if (!igorService) {
@@ -90,7 +77,7 @@ class BuildService {
       return [:]
     }
     try {
-      igorService.getJobConfig(controller, encode(job))
+      igorService.getJobConfig(controller, job)
     } catch (RetrofitError e) {
       if (e.response?.status == 404) {
         throw new BuildMasterNotFound("Job not found (controller: '${controller}', job: '${job}')")
@@ -105,7 +92,7 @@ class BuildService {
       return []
     }
     try {
-      igorService.getBuilds(controller, encode(job))
+      igorService.getBuilds(controller, job)
     } catch (RetrofitError e) {
       if (e.response?.status == 404) {
         throw new BuildMasterNotFound("Builds not found (controller: '${controller}', job: '${job}')")
@@ -120,7 +107,7 @@ class BuildService {
       return [:]
     }
     try {
-      igorService.getBuild(controller, encode(job), number)
+      igorService.getBuild(controller, job, number)
     } catch (RetrofitError e) {
       if (e.response?.status == 404) {
         throw new BuildMasterNotFound("Build not found (controller: '${controller}', job: '${job}', build: ${number})")

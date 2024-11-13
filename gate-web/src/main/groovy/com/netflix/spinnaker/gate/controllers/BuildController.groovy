@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.servlet.HandlerMapping
 
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.web.util.UriUtils
 
 @Slf4j
 @CompileStatic
@@ -106,14 +107,18 @@ class BuildController {
   @RequestMapping(value = "/v3/builds/{buildMaster}/job", method = RequestMethod.GET)
   Map v3GetJobConfig(@PathVariable("buildMaster") String buildMaster,
                      @RequestParam(value = "job", required = true) String job) {
-    buildService.getJobConfig(buildMaster, job)
+    buildService.getJobConfig(buildMaster, encode(job))
   }
 
   @ApiOperation(value = "Get builds for build master", response = List.class)
   @RequestMapping(value = "/v3/builds/{buildMaster}/builds", method = RequestMethod.GET)
   List v3GetBuilds(@PathVariable("buildMaster") String buildMaster,
                    @RequestParam(value = "job", required = true) String job) {
-    buildService.getBuilds(buildMaster, job)
+    buildService.getBuilds(buildMaster, encode(job))
+  }
+
+  static String encode(String job) {
+    UriUtils.encodeFragment(job, "UTF-8")
   }
 
   @ApiOperation(value = "Get build for build master", response = HashMap.class)
@@ -121,7 +126,7 @@ class BuildController {
   Map v3GetBuild(@PathVariable("buildMaster") String buildMaster,
                  @PathVariable("number") String number,
                  @RequestParam(value = "job", required = true) String job) {
-    buildService.getBuild(buildMaster, job, number)
+    buildService.getBuild(buildMaster, encode(job), number)
   }
 
 }
