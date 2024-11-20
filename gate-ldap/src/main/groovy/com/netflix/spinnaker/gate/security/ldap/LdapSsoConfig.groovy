@@ -24,7 +24,6 @@ import com.netflix.spinnaker.security.User
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
-import org.springframework.boot.autoconfigure.security.SecurityProperties
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -59,9 +58,6 @@ class LdapSsoConfig {
   LdapUserContextMapper ldapUserContextMapper
 
   @Autowired
-  SecurityProperties securityProperties
-
-  @Autowired
   DefaultCookieSerializer defaultCookieSerializer
 
   @Autowired
@@ -92,7 +88,7 @@ class LdapSsoConfig {
   }
 
   @Bean
-  SecurityFilterChain configure(HttpSecurity http, AuthenticationConfiguration authConfiguration) throws Exception {
+  SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationConfiguration authConfiguration) throws Exception {
     def authenticationManager = authConfiguration.getAuthenticationManager()
     defaultCookieSerializer.setSameSite(null)
     http.formLogin()

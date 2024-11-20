@@ -91,7 +91,7 @@ class LdapAuthSpec extends Specification {
                                                  .cookie(sessionCookie))
            .andDo(print())
            .andExpect(status().is(302))
-           .andExpect(redirectedUrl("http://localhost/credentials"))
+           .andExpect(redirectedUrl("http://localhost/credentials?continue"))
            .andDo(extractSession)
 
     def result = mockMvc.perform(get("/credentials").cookie(sessionCookie))
