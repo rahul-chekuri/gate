@@ -24,6 +24,7 @@ import com.netflix.spinnaker.gate.security.YamlFileApplicationContextInitializer
 import com.netflix.spinnaker.gate.services.AccountLookupService
 import com.netflix.spinnaker.gate.services.internal.ClouddriverService
 import groovy.util.logging.Slf4j
+import jakarta.servlet.http.Cookie
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -36,8 +37,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.util.Base64Utils
 import spock.lang.Specification
-
-import jakarta.servlet.http.Cookie
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
@@ -52,6 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 )
 @AutoConfigureMockMvc
 @TestPropertySource("/basic-auth.properties")
+
 class BasicAuthSpec extends Specification {
 
   @Autowired
@@ -76,7 +76,7 @@ class BasicAuthSpec extends Specification {
       .cookie(sessionCookie))
       .andDo(print())
       .andExpect(status().is(302))
-      .andExpect(redirectedUrl("http://localhost/credentials"))
+      .andExpect(redirectedUrl("http://localhost/credentials?continue"))
       .andDo(extractSession)
 
     def result = mockMvc.perform(get("/credentials").cookie(sessionCookie))
