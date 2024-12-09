@@ -19,11 +19,11 @@ package com.netflix.spinnaker.gate.config
 import com.netflix.spinnaker.fiat.shared.FiatPermissionEvaluator
 import com.netflix.spinnaker.fiat.shared.FiatStatus
 import org.springframework.context.ApplicationContext
+import org.springframework.context.support.GenericApplicationContext
 import org.springframework.security.config.annotation.ObjectPostProcessor
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.web.util.matcher.AnyRequestMatcher
-import org.springframework.context.support.GenericApplicationContext
 import spock.lang.Specification
 
 import java.util.stream.Collectors
@@ -42,8 +42,7 @@ class AuthConfigTest extends Specification {
     def authConfig = new AuthConfig(
       Mock(PermissionRevokingLogoutSuccessHandler),
       Mock(FiatStatus),
-      Mock(FiatPermissionEvaluator),
-      mockRequestMatcherProvider)
+      Mock(FiatPermissionEvaluator))
     authConfig.securityDebug = false
     authConfig.fiatSessionFilterEnabled = false
     def httpSecurity = new HttpSecurity(
@@ -76,8 +75,7 @@ class AuthConfigTest extends Specification {
     def authConfig = new AuthConfig(
       Mock(PermissionRevokingLogoutSuccessHandler),
       Mock(FiatStatus),
-      Mock(FiatPermissionEvaluator),
-      mockRequestMatcherProvider)
+      Mock(FiatPermissionEvaluator))
     authConfig.securityDebug = false
     authConfig.fiatSessionFilterEnabled = false
     authConfig.webhookDefaultAuthEnabled = true
@@ -98,7 +96,7 @@ class AuthConfigTest extends Specification {
         it.configAttrs.stream().any( {att -> att.getAttribute() == "authenticated"})
       })
       .collect(Collectors.toList())
-    filtered.size() == 1
+    filtered.size() == 0
   }
 
   private HashMap<Class<?>, Object> getSharedObjects(){
