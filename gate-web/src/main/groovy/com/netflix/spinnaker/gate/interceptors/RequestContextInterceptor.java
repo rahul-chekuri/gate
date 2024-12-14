@@ -21,9 +21,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 
-public class RequestContextInterceptor extends HandlerInterceptorAdapter {
+public class RequestContextInterceptor implements HandlerInterceptor {
 
   private static Pattern applicationPattern = Pattern.compile("/applications/([^/]+)");
   private static Pattern orchestrationMatch = Pattern.compile("/(?:tasks$|tasks/)");

@@ -22,7 +22,7 @@ import com.netflix.spinnaker.security.AuthenticatedRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Optional;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * Return values (e.g. X-SPINNAKER-*) stored in the AuthenticatedRequest (backed by MDC and set via
@@ -32,7 +32,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  * X-SPINNAKER-EXECUTION-ID is also absent. For other fields, no values are returned if they are
  * absent from AuthenticatedRequest.
  */
-public class ResponseHeaderInterceptor extends HandlerInterceptorAdapter {
+public class ResponseHeaderInterceptor implements HandlerInterceptor {
 
   private final ResponseHeaderInterceptorConfigurationProperties properties;
 
