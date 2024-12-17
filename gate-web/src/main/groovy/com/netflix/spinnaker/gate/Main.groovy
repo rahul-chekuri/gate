@@ -16,7 +16,7 @@
 
 package com.netflix.spinnaker.gate
 
-import graphql.kickstart.spring.web.boot.GraphQLWebsocketAutoConfiguration
+import graphql.kickstart.autoconfigure.web.servlet.GraphQLWebsocketAutoConfiguration
 import org.springframework.boot.actuate.autoconfigure.ldap.LdapHealthContributorAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.groovy.template.GroovyTemplateAutoConfiguration
