@@ -42,6 +42,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -144,7 +145,8 @@ class AuthConfigTest {
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
       // This is the same as BasicAuthConfig except for
       //
       // authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"));
@@ -153,6 +155,7 @@ class AuthConfigTest {
       defaultCookieSerializer.setSameSite(null);
       http.formLogin().and().httpBasic();
       authConfig.configure(http);
+      return http.build();
     }
   }
 
