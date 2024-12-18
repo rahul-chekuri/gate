@@ -39,7 +39,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.web.SecurityFilterChain
 import retrofit.RetrofitError
 import retrofit.RestAdapter
 import retrofit.converter.JacksonConverter
@@ -191,7 +191,7 @@ class FunctionalSpec extends Specification {
   @Order(10)
   @Import(ErrorConfiguration)
   @EnableAutoConfiguration(exclude = [GroovyTemplateAutoConfiguration, GsonAutoConfiguration])
-  private static class FunctionalConfiguration extends WebSecurityConfigurerAdapter {
+  private static class FunctionalConfiguration{
 
     @Bean
     ClouddriverServiceSelector clouddriverSelector() {
@@ -297,11 +297,13 @@ class FunctionalSpec extends Specification {
       new PipelineControllerConfigProperties();
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-      http
+    @Bean
+    SecurityFilterChain configure(HttpSecurity http) throws Exception {
+      return http
         .csrf().disable()
-        .authorizeRequests().antMatchers("/**").permitAll()
+        .authorizeHttpRequests(
+        (authz) -> authz.requestMatchers("/**").permitAll())
+        .build()
     }
   }
 }
