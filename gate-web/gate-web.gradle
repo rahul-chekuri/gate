@@ -44,7 +44,7 @@ dependencies {
   implementation "org.springframework.boot:spring-boot-starter-aop"
   implementation "io.github.resilience4j:resilience4j-spring-boot2"
 
-  implementation "com.graphql-java-kickstart:graphql-spring-boot-starter:15.0.0"
+  implementation "com.graphql-java-kickstart:graphql-spring-boot-starter:7.0.1"
   implementation "com.graphql-java-kickstart:graphql-java-tools:6.0.2"
   implementation ("com.graphql-java:graphql-java:14.0") { // To avoid version bump with spring boot 2.7.x upgrade.
       force = true					   // Unpin it after adoption of spring-boot-starter-graphql
