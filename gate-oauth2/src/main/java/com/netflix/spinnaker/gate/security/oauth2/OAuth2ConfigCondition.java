@@ -25,14 +25,13 @@ class OAuth2ConfigCondition extends AnyNestedCondition {
     super(ConfigurationPhase.PARSE_CONFIGURATION);
   }
 
-  @ConditionalOnProperty(prefix = "spring.security.oauth2.client.registration.github", name = "client-id")
-  static class GithubCondition {
+  @ConditionalOnProperty(
+      prefix = "spring.security.oauth2.client.registration.github",
+      name = "client-id")
+  static class GithubCondition {}
 
-  }
-
-  @ConditionalOnProperty(prefix = "spring.security.oauth2.client.registration.google", name = "client-id")
-  static class GoogleCondition {
-
-  }
-
+  @ConditionalOnProperty(
+      prefix = "spring.security.oauth2.client.registration.google",
+      name = "client-id")
+  static class GoogleCondition {}
 }

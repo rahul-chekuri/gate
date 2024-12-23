@@ -34,19 +34,17 @@ import org.springframework.session.web.http.DefaultCookieSerializer;
 @Conditional(OAuth2ConfigCondition.class)
 public class OAuth2Sso {
 
-  @Autowired
-  AuthConfig authConfig;
+  @Autowired AuthConfig authConfig;
 
-  @Autowired
-  DefaultCookieSerializer defaultCookieSerializer;
+  @Autowired DefaultCookieSerializer defaultCookieSerializer;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
     defaultCookieSerializer.setSameSite(null);
     authConfig.configure(httpSecurity);
-    return httpSecurity.authorizeHttpRequests
-        (auth -> auth.anyRequest().authenticated())
-      .oauth2Login(Customizer.withDefaults())
-      .build();
+    return httpSecurity
+        .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+        .oauth2Login(Customizer.withDefaults())
+        .build();
   }
 }
