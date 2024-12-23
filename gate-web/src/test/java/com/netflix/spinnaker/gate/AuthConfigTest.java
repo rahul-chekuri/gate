@@ -38,6 +38,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,9 +47,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-/** AuthConfig is in gate-core, but is about matching http requests, so use gate-web to test it. */
 @SpringBootTest(
     classes = {Main.class, AuthConfigTest.TestConfiguration.class},
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -136,6 +138,26 @@ class AuthConfigTest {
     assertThat(response.getBody()).isNull();
   }
 
+  @Test
+  public void whenAuthEnabledForWebhookWithCredentials() throws Exception {
+    String body = "new message";
+    HttpEntity<String> entity = new HttpEntity<>(body);
+    final ResponseEntity<Object> response = restTemplate
+      .withBasicAuth(TEST_USER, TEST_PASSWORD)
+      .exchange("/webhooks/sample", HttpMethod.POST, entity, Object.class);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    assertThat(response.getBody()).isEqualTo(body);
+  }
+
+  @Test
+  public void whenAuthEnabledForWebhookWithoutCredentials() throws Exception {
+    String body = "new message";
+    HttpEntity<String> entity = new HttpEntity<>(body);
+    final ResponseEntity<Object> response = restTemplate
+      .exchange("/webhooks/sample", HttpMethod.POST, entity, Object.class);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+  }
+
   static class TestAuthConfig extends BasicAuthConfig {
     public TestAuthConfig(
         AuthConfig authConfig,
@@ -171,6 +193,11 @@ class AuthConfigTest {
       @GetMapping("/hello")
       public String hello() {
         return "hello";
+      }
+
+      @PostMapping("/webhooks/sample")
+      public ResponseEntity<String> webhooks(@RequestBody String message) {
+        return new ResponseEntity<>(message, HttpStatus.CREATED);
       }
     }
 
