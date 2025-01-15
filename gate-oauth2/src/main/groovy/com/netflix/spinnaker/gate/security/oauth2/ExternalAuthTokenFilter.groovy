@@ -16,58 +16,58 @@
 
 package com.netflix.spinnaker.gate.security.oauth2
 
-import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoRestTemplateFactory
-import org.springframework.security.core.Authentication
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken
-import org.springframework.security.oauth2.common.OAuth2AccessToken
-import org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor
-import org.springframework.stereotype.Component
-
-import javax.servlet.Filter
-import javax.servlet.FilterChain
-import javax.servlet.FilterConfig
-import javax.servlet.ServletException
-import javax.servlet.ServletRequest
-import javax.servlet.ServletResponse
-import javax.servlet.http.HttpServletRequest
-
-/**
- * This class supports the use case of an externally provided OAuth access token, for example, a
- * Github-issued personal access token.
- */
-@Slf4j
-@Component
-class ExternalAuthTokenFilter implements Filter {
-
-  // UserInfoRestTemplateFactory can't be Autowired if no oauth2 configurations are set.
-  // In this case, userInfoRestTemplateFactory will be null
-  @Autowired(required = false)
-  UserInfoRestTemplateFactory userInfoRestTemplateFactory
-
-  BearerTokenExtractor extractor = new BearerTokenExtractor()
-
-  @Override
-  void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-    def httpServletRequest = (HttpServletRequest) request
-    Authentication auth = extractor.extract(httpServletRequest)
-    if (auth?.principal) {
-      DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(auth.principal.toString())
-      // Reassign token type to be capitalized "Bearer",
-      // see https://github.com/spinnaker/spinnaker/issues/2074
-      token.tokenType = OAuth2AccessToken.BEARER_TYPE
-      if (userInfoRestTemplateFactory != null) {
-        def ctx = userInfoRestTemplateFactory.getUserInfoRestTemplate().getOAuth2ClientContext()
-        ctx.accessToken = token
-      }
-    }
-    chain.doFilter(request, response)
-  }
-
-  @Override
-  void init(FilterConfig filterConfig) throws ServletException {}
-
-  @Override
-  void destroy() {}
-}
+//import groovy.util.logging.Slf4j
+//import org.springframework.beans.factory.annotation.Autowired
+//import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoRestTemplateFactory
+//import org.springframework.security.core.Authentication
+//import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken
+//import org.springframework.security.oauth2.common.OAuth2AccessToken
+//import org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor
+//import org.springframework.stereotype.Component
+//
+//import javax.servlet.Filter
+//import javax.servlet.FilterChain
+//import javax.servlet.FilterConfig
+//import javax.servlet.ServletException
+//import javax.servlet.ServletRequest
+//import javax.servlet.ServletResponse
+//import javax.servlet.http.HttpServletRequest
+//
+///**
+// * This class supports the use case of an externally provided OAuth access token, for example, a
+// * Github-issued personal access token.
+// */
+//@Slf4j
+//@Component
+//class ExternalAuthTokenFilter implements Filter {
+//
+//  // UserInfoRestTemplateFactory can't be Autowired if no oauth2 configurations are set.
+//  // In this case, userInfoRestTemplateFactory will be null
+//  @Autowired(required = false)
+//  UserInfoRestTemplateFactory userInfoRestTemplateFactory
+//
+//  BearerTokenExtractor extractor = new BearerTokenExtractor()
+//
+//  @Override
+//  void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+//    def httpServletRequest = (HttpServletRequest) request
+//    Authentication auth = extractor.extract(httpServletRequest)
+//    if (auth?.principal) {
+//      DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(auth.principal.toString())
+//      // Reassign token type to be capitalized "Bearer",
+//      // see https://github.com/spinnaker/spinnaker/issues/2074
+//      token.tokenType = OAuth2AccessToken.BEARER_TYPE
+//      if (userInfoRestTemplateFactory != null) {
+//        def ctx = userInfoRestTemplateFactory.getUserInfoRestTemplate().getOAuth2ClientContext()
+//        ctx.accessToken = token
+//      }
+//    }
+//    chain.doFilter(request, response)
+//  }
+//
+//  @Override
+//  void init(FilterConfig filterConfig) throws ServletException {}
+//
+//  @Override
+//  void destroy() {}
+//}
